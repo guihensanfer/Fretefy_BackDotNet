@@ -20,7 +20,12 @@ namespace Fretefy.Test.WebApi.Controllers
             _regiaoService = regiaoService;
         }
 
-        [HttpPost]
+        /// <summary>
+        /// Adiciona uma nova região
+        /// </summary>
+        /// <param name="regiaoDTO">Objeto contendo informações da região</param>
+        /// <returns>Retorna a região criada</returns>
+        [HttpPost("AddRegiao")]
         public async Task<IActionResult> AddRegiao([FromBody] RegiaoDTO regiaoDTO)
         {
             if (regiaoDTO == null)
@@ -43,7 +48,12 @@ namespace Fretefy.Test.WebApi.Controllers
             }
         }
 
-        [HttpPost]
+        /// <summary>
+        /// Adiciona vínculos de cidades a uma região
+        /// </summary>
+        /// <param name="regiaoDTO">Objeto contendo região e lista de cidades</param>
+        /// <returns>Ok se sucesso</returns>
+        [HttpPost("AddRegiaoCidadesVinculos")]
         public async Task<IActionResult> AddRegiaoCidadesVinculos([FromBody] RegiaoDTO regiaoDTO)
         {
             if (regiaoDTO == null || regiaoDTO.Regiao == null || regiaoDTO.CidadesVinculadas == null)
@@ -69,7 +79,12 @@ namespace Fretefy.Test.WebApi.Controllers
             }
         }
 
-        [HttpPut]
+        /// <summary>
+        /// Atualiza uma região existente
+        /// </summary>
+        /// <param name="regiao">Objeto região atualizado</param>
+        /// <returns>Retorna a região atualizada</returns>
+        [HttpPut("UpdateRegiao")]
         public IActionResult UpdateRegiao([FromBody] Regiao regiao)
         {
             if (regiao == null)
@@ -92,7 +107,12 @@ namespace Fretefy.Test.WebApi.Controllers
             }
         }
 
-        [HttpDelete]
+        /// <summary>
+        /// Remove uma região
+        /// </summary>
+        /// <param name="regiao">Objeto região a ser removido</param>
+        /// <returns>Retorna a região removida</returns>
+        [HttpDelete("DeleteRegiao")]
         public IActionResult DeleteRegiao([FromBody] Regiao regiao)
         {
             if (regiao == null)
@@ -115,7 +135,12 @@ namespace Fretefy.Test.WebApi.Controllers
             }
         }
 
-        [HttpDelete]
+        /// <summary>
+        /// Remove todos os vínculos de cidades de uma região
+        /// </summary>
+        /// <param name="regiao">Objeto região</param>
+        /// <returns>Retorna a região</returns>
+        [HttpDelete("RemoveRegiaoCidadeTodosVinculos")]
         public IActionResult RemoveRegiaoCidadeTodosVinculos([FromBody] Regiao regiao)
         {
             if (regiao == null)
@@ -138,6 +163,13 @@ namespace Fretefy.Test.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Lista todas as regiões
+        /// </summary>
+        /// <param name="ativo">Filtra apenas regiões ativas (opcional)</param>
+        /// <param name="page">Número da página</param>
+        /// <param name="itemsPerPage">Itens por página</param>
+        /// <returns>Lista paginada de regiões</returns>
         [HttpGet]
         public async Task<IActionResult> ListRegioes([FromQuery] bool? ativo = true, [FromQuery] int page = 1, [FromQuery] int itemsPerPage = 15)
         {
@@ -159,6 +191,14 @@ namespace Fretefy.Test.WebApi.Controllers
             }
         }
         
+        /// <summary>
+        /// Lista regiões filtradas pelo nome
+        /// </summary>
+        /// <param name="nome">Nome da região</param>
+        /// <param name="ativo">Filtra apenas regiões ativas (opcional)</param>
+        /// <param name="page">Número da página</param>
+        /// <param name="itemsPerPage">Itens por página</param>
+        /// <returns>Lista paginada de regiões filtradas</returns>
         [HttpGet("ListRegioesByNome")]
         public async Task<IActionResult> ListRegioesByNome([FromQuery] string nome, [FromQuery] bool? ativo = true, [FromQuery] int page = 1, [FromQuery] int itemsPerPage = 15)
         {            
