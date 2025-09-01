@@ -159,7 +159,7 @@ namespace Fretefy.Test.WebApi.Controllers
             }
         }
         
-        [HttpGet]
+        [HttpGet("ListRegioesByNome")]
         public async Task<IActionResult> ListRegioesByNome([FromQuery] string nome, [FromQuery] bool? ativo = true, [FromQuery] int page = 1, [FromQuery] int itemsPerPage = 15)
         {            
             try

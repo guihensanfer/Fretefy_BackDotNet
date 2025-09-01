@@ -33,11 +33,14 @@ namespace Fretefy.Test.WebApi
         private void ConfigureDomainService(IServiceCollection services)
         {
             services.AddScoped<ICidadeService, CidadeService>();
+            services.AddScoped<IRegiaoService, RegiaoService>();            
         }
 
         private void ConfigureInfraService(IServiceCollection services)
         {
             services.AddScoped<ICidadeRepository, CidadeRepository>();
+            services.AddScoped<IRegiaoRepository, RegiaoRepository>();
+            services.AddScoped<IRegiaoCidadeRepository, RegiaoCidadeRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

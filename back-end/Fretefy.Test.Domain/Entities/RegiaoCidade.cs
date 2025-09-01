@@ -4,10 +4,12 @@ namespace Fretefy.Test.Domain.Entities
 {
     public class RegiaoCidade : IEntity
     {
+        public RegiaoCidade(){}
+
         public RegiaoCidade(Guid regiaoId, Guid cidadeId)
         {
             RegiaoId = regiaoId;
-            CidadeID = cidadeId;            
+            CidadeID = cidadeId;
         }
 
         public Guid RegiaoId { get; set; }
