@@ -4,32 +4,42 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 namespace Fretefy.Test.Infra.EntityFramework.Repositories
 {
     public class RegiaoCidadeRepository : IRegiaoCidadeRepository
     {
-        private DbSet<RegiaoCidade> _dbSet;
+        private readonly DbSet<RegiaoCidade> _dbSet;
+        private readonly DbContext _dbContext;
 
         public RegiaoCidadeRepository(DbContext dbContext)
         {
             _dbSet = dbContext.Set<RegiaoCidade>();
         }
 
-        public IQueryable<RegiaoCidade> List()
+        public async Task AddRangeAsync(List<RegiaoCidade> regioesCidades)
         {
-            return _dbSet.AsQueryable();
+            await _dbSet.AddRangeAsync(regioesCidades);
         }
 
-        public IEnumerable<RegiaoCidade> ListByCidadeId(Guid cidadeId)
+        public void Remove(Guid regiaoId)
         {
-            return _dbSet.Where(w => w.CidadeID == cidadeId);
-        }
-        
-        public IEnumerable<RegiaoCidade> ListByRegiaoId(Guid regiaoId)
-        {
-            return _dbSet.Where(w => w.RegiaoId == regiaoId);
+            var regioes = _dbSet.Where(x => x.RegiaoId == regiaoId).ToList();
+
+            if(regioes.Any())            
+                _dbSet.RemoveRange(regioes);
         }
 
+        async Task<List<RegiaoCidade>> IRegiaoCidadeRepository.ListByRegiaoIdAsync(Guid regiaoId)
+        {
+            return await _dbSet.Where(x => x.RegiaoId == regiaoId).ToListAsync();
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

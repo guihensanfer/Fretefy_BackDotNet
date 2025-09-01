@@ -2,20 +2,20 @@ using Fretefy.Test.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Fretefy.Test.Domain.Interfaces.Repositories
 {
     public interface IRegiaoCidadeRepository
     {
-        IQueryable<RegiaoCidade> List();
+        // Insert
+        Task AddRangeAsync(List<RegiaoCidade> regioesCidades);
 
-        /// <summary>
-        /// Listará regiões para uma cidade especifica, ideal para filtro em tela.
-        /// </summary>
-        /// <param name="cidadeId"></param>
-        /// <returns></returns>
-        IEnumerable<RegiaoCidade> ListByCidadeId(Guid cidadeId);        
-        
-        IEnumerable<RegiaoCidade> ListByRegiaoId(Guid regiaoId);        
+        // Delete
+        void Remove(Guid regiaoId);
+
+        Task<List<RegiaoCidade>> ListByRegiaoIdAsync(Guid regiaoId);
+
+        Task SaveChangesAsync();    
     }
 }
