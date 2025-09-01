@@ -44,7 +44,7 @@ namespace Fretefy.Test.WebApi
         private void ConfigureDomainService(IServiceCollection services)
         {
             services.AddScoped<ICidadeService, CidadeService>();
-            services.AddScoped<IRegiaoService, RegiaoService>();            
+            services.AddScoped<IRegiaoService, RegiaoService>();                        
         }
 
         private void ConfigureInfraService(IServiceCollection services)

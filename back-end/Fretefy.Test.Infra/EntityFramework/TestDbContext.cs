@@ -28,6 +28,8 @@ namespace Fretefy.Test.Infra.EntityFramework
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfiguration(new CidadeMap());
+
+            
         }
     }
 }

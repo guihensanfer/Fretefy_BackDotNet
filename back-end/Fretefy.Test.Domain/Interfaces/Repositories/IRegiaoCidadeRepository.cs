@@ -14,7 +14,7 @@ namespace Fretefy.Test.Domain.Interfaces.Repositories
         // Delete
         void Remove(Guid regiaoId);
 
-        Task<List<RegiaoCidade>> ListByRegiaoIdAsync(Guid regiaoId);
+        Task<List<RegiaoCidade>> ListByRegiaoIdAsync(Guid regiaoId);        
 
         Task SaveChangesAsync();    
     }

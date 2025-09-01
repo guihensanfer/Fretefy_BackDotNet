@@ -64,10 +64,17 @@ namespace Fretefy.Test.Domain.Services
 
         public async Task AddRegiaoCidadeVinculosAsync(Guid regiaoId, Guid[] cidadeIds)
         {
+            if (cidadeIds == null || cidadeIds.Length <= 0)
+                throw new InvalidOperationException("Informe ao menos uma cidade.");
+
+            // Primeiro remove os vinculos existentes
+                RemoveRegiaoCidadeVinculos(regiaoId);
+
             // Percorre os ids para criar um insert em massa
             List<RegiaoCidade> vinculos = new List<RegiaoCidade>();
             vinculos.AddRange(cidadeIds.Select(c => new RegiaoCidade(regiaoId, c)));
-            await _regiaoCidadeRepository.AddRangeAsync(vinculos);            
+            await _regiaoCidadeRepository.AddRangeAsync(vinculos);
+
             await _regiaoCidadeRepository.SaveChangesAsync();
         }
 
@@ -88,7 +95,7 @@ namespace Fretefy.Test.Domain.Services
         public async Task<RegioesDTO> ListRegioesAsync(Paginacao paginacao, bool? ativo = true)
         {
             var regioes = await _regiaoRepository.ListAsync(paginacao, ativo);
-            RegioesDTO regioesDTO = new RegioesDTO();
+            RegioesDTO regioesDTO = new RegioesDTO();            
 
             foreach (var regiao in regioes)
             {
@@ -125,16 +132,21 @@ namespace Fretefy.Test.Domain.Services
             _regiaoCidadeRepository.Remove(regiao.Id);
             // Remove a região em si
             _regiaoRepository.Remove(regiao);
+
+            _regiaoCidadeRepository.SaveChangesAsync();
+            _regiaoRepository.SaveChangesAsync();
         }
 
         public void RemoveRegiaoCidadeVinculos(Guid regiaoId)
         {
             _regiaoCidadeRepository.Remove(regiaoId);
+            _regiaoCidadeRepository.SaveChangesAsync();
         }
 
         public void UpdateRegiao(Regiao regiao)
         {
             _regiaoRepository.Update(regiao);
+            _regiaoRepository.SaveChangesAsync();
         }
     }
 }

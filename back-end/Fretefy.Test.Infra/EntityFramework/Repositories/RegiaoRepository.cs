@@ -17,6 +17,7 @@ namespace Fretefy.Test.Infra.EntityFramework.Repositories
         public RegiaoRepository(DbContext dbContext)
         {
             _dbSet = dbContext.Set<Regiao>();
+            _dbContext = dbContext;
         }
 
         public async Task AddAsync(Regiao regiao)
@@ -83,7 +84,7 @@ namespace Fretefy.Test.Infra.EntityFramework.Repositories
 
         public void Update(Regiao regiao)
         {
-            _dbSet.UpdateRange(regiao);
+            _dbSet.Update(regiao);
         }
     }
 }

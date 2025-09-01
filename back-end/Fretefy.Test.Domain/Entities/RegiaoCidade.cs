@@ -12,9 +12,9 @@ namespace Fretefy.Test.Domain.Entities
             CidadeID = cidadeId;
         }
 
-        public Guid RegiaoId { get; set; }
-
-        public Guid CidadeID { get; set; }
+        public Guid RegiaoId { get; set; }                 
+        public Guid CidadeID { get; set; }        
+        
         public Guid Id { get; set; }
     }
 }

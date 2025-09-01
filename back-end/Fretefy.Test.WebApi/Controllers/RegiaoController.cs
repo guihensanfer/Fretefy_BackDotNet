@@ -49,21 +49,24 @@ namespace Fretefy.Test.WebApi.Controllers
         }
 
         /// <summary>
-        /// Adiciona vínculos de cidades a uma região
+        /// Atualiza vínculos de cidades a uma região
         /// </summary>
         /// <param name="regiaoDTO">Objeto contendo região e lista de cidades</param>
         /// <returns>Ok se sucesso</returns>
-        [HttpPost("AddRegiaoCidadesVinculos")]
-        public async Task<IActionResult> AddRegiaoCidadesVinculos([FromBody] RegiaoDTO regiaoDTO)
+        [HttpPut("UpdateRegiaoCidadesVinculos")]
+        public async Task<IActionResult> UpdateRegiaoCidadesVinculos([FromBody] RegiaoUpdateDTO regiaoDTO)
         {
-            if (regiaoDTO == null || regiaoDTO.Regiao == null || regiaoDTO.CidadesVinculadas == null)
+            if (regiaoDTO == null || regiaoDTO.CidadesIdsVinculadas == null)
                 return BadRequest("Objeto Região não pode ser nulo.");            
+           
 
             try
             {
-                await _regiaoService.AddRegiaoCidadeVinculosAsync(regiaoDTO.Regiao.Id,
-                    regiaoDTO.CidadesVinculadas.Select(x=> x.CidadeID)?.ToArray()
-                    );
+                
+                await _regiaoService.AddRegiaoCidadeVinculosAsync(
+                    regiaoDTO.RegiaoId,
+                    regiaoDTO.CidadesIdsVinculadas
+                );
 
                 return Ok();
             }
@@ -134,34 +137,7 @@ namespace Fretefy.Test.WebApi.Controllers
                 return StatusCode(500, $"Erro interno: {ex.Message}");
             }
         }
-
-        /// <summary>
-        /// Remove todos os vínculos de cidades de uma região
-        /// </summary>
-        /// <param name="regiao">Objeto região</param>
-        /// <returns>Retorna a região</returns>
-        [HttpDelete("RemoveRegiaoCidadeTodosVinculos")]
-        public IActionResult RemoveRegiaoCidadeTodosVinculos([FromBody] Regiao regiao)
-        {
-            if (regiao == null)
-                return BadRequest("Objeto Região não pode ser nulo.");
-
-            try
-            {
-                _regiaoService.RemoveRegiaoCidadeVinculos(regiao.Id);
-                return Ok(regiao);
-            }
-            catch (InvalidOperationException ex)
-            {
-                // Regra de negócio violada (ex: região já existe)
-                return BadRequest(ex.Message); // 400 Bad Request
-            }
-            catch (Exception ex)
-            {
-                // Erros inesperados
-                return StatusCode(500, $"Erro interno: {ex.Message}");
-            }
-        }
+        
 
         /// <summary>
         /// Lista todas as regiões

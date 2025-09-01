@@ -17,6 +17,7 @@ namespace Fretefy.Test.Infra.EntityFramework.Repositories
         public RegiaoCidadeRepository(DbContext dbContext)
         {
             _dbSet = dbContext.Set<RegiaoCidade>();
+            _dbContext = dbContext;
         }
 
         public async Task AddRangeAsync(List<RegiaoCidade> regioesCidades)

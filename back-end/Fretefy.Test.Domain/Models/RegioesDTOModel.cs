@@ -5,7 +5,11 @@ namespace Fretefy.Test.Domain.Models
 {
     public class RegioesDTO
     {
-        public List<RegiaoDTO> Data{ get; set; }
+        public RegioesDTO()
+        {
+            Data = new List<RegiaoDTO>();
+        }
+        public List<RegiaoDTO> Data { get; set; }
     }
 
     public class RegiaoDTO
