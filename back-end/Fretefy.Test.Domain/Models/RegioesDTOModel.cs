@@ -16,6 +16,6 @@ namespace Fretefy.Test.Domain.Models
     {
         public Regiao Regiao { get; set; }
 
-        public List<RegiaoCidade> CidadesVinculadas { get; set; }
+        public List<RegiaoCidade> CidadesVinculadas { get; set; }        
     }    
 }

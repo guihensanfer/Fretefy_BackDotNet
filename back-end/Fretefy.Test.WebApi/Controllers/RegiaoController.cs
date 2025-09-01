@@ -116,15 +116,28 @@ namespace Fretefy.Test.WebApi.Controllers
         /// <param name="regiao">Objeto região a ser removido</param>
         /// <returns>Retorna a região removida</returns>
         [HttpDelete("DeleteRegiao")]
-        public IActionResult DeleteRegiao([FromBody] Regiao regiao)
+        public async Task<IActionResult> DeleteRegiao([FromQuery] string regiaoId)
         {
-            if (regiao == null)
-                return BadRequest("Objeto Região não pode ser nulo.");
+            if (string.IsNullOrWhiteSpace(regiaoId))
+                return BadRequest("Informe o regionId");
+                
+            if(!Guid.TryParse(regiaoId, out Guid _regiaoId))
+                return BadRequest("Não foi possível identificar o regionId informado.");
 
             try
             {
-                _regiaoService.RemoveRegiao(regiao);
-                return Ok(regiao);
+                var regiao = await _regiaoService.GetRegiaoByIdAsync(_regiaoId);
+
+                if (regiao != null)
+                {
+                    _regiaoService.RemoveRegiao(regiao.Regiao);
+
+                    return Ok(regiao);
+                }
+                else
+                {
+                    return NotFound();
+                }           
             }
             catch (InvalidOperationException ex)
             {
