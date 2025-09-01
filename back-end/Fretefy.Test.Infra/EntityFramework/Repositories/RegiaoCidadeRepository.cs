@@ -36,11 +36,21 @@ namespace Fretefy.Test.Infra.EntityFramework.Repositories
         async Task<List<RegiaoCidade>> IRegiaoCidadeRepository.ListByRegiaoIdAsync(Guid regiaoId)
         {
             return await _dbSet.Where(x => x.RegiaoId == regiaoId).ToListAsync();
-        }
+        }        
 
         public async Task SaveChangesAsync()
         {
             await _dbContext.SaveChangesAsync();
+        }
+
+        public Task<bool> CheckExists(Guid regiaoId, Guid cidadeId)
+        {
+            return _dbSet.AnyAsync(x => x.RegiaoId == regiaoId && x.CidadeID == cidadeId);
+        }
+
+        public Task<bool> ValidCidade(Guid cidadeId)
+        {
+            return _dbSet.AnyAsync(x => x.CidadeID == cidadeId);
         }
     }
 }

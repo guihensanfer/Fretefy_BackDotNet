@@ -14,7 +14,15 @@ namespace Fretefy.Test.Domain.Interfaces.Repositories
         // Delete
         void Remove(Guid regiaoId);
 
-        Task<List<RegiaoCidade>> ListByRegiaoIdAsync(Guid regiaoId);        
+        Task<List<RegiaoCidade>> ListByRegiaoIdAsync(Guid regiaoId);
+
+        /// <summary>
+        /// Verifica se já existe o cadastro.
+        /// </summary>
+        /// <param name="regiaoId"></param>
+        /// <param name="cidadeId"></param>
+        /// <returns></returns>
+        Task<bool> CheckExists(Guid regiaoId, Guid cidadeId);        
 
         Task SaveChangesAsync();    
     }

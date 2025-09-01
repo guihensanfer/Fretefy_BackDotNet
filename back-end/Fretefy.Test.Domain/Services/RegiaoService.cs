@@ -63,16 +63,27 @@ namespace Fretefy.Test.Domain.Services
         }
 
         public async Task AddRegiaoCidadeVinculosAsync(Guid regiaoId, Guid[] cidadeIds)
-        {
+        {            
             if (cidadeIds == null || cidadeIds.Length <= 0)
                 throw new InvalidOperationException("Informe ao menos uma cidade.");
 
+            // Somente os ids que são novos, os já existentes ignora
+            List<Guid> cidadesIdsValidas = new List<Guid>();
+
+            foreach (var cidadeId in cidadeIds)
+            {
+                if (await _regiaoCidadeRepository.CheckExists(regiaoId, cidadeId) == false)
+                {
+                    cidadesIdsValidas.Add(cidadeId);
+                }                    
+            }
+
             // Primeiro remove os vinculos existentes
-                RemoveRegiaoCidadeVinculos(regiaoId);
+            RemoveRegiaoCidadeVinculos(regiaoId);
 
             // Percorre os ids para criar um insert em massa
             List<RegiaoCidade> vinculos = new List<RegiaoCidade>();
-            vinculos.AddRange(cidadeIds.Select(c => new RegiaoCidade(regiaoId, c)));
+            vinculos.AddRange(cidadesIdsValidas.Select(c => new RegiaoCidade(regiaoId, c)));            
             await _regiaoCidadeRepository.AddRangeAsync(vinculos);
 
             await _regiaoCidadeRepository.SaveChangesAsync();

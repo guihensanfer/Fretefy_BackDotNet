@@ -23,12 +23,12 @@ namespace Fretefy.Test.Domain.Interfaces
         Task<RegiaoDTO> GetRegiaoByIdAsync(Guid regiaoId);
 
         // Regiões cidades
-        
+
         Task AddRegiaoCidadeVinculosAsync(Guid regiaoId, Guid[] cidadeIds);
         /// <summary>
         /// Remove todos os vinculos.
         /// </summary>
         /// <param name="regiaoId"></param>
-        void RemoveRegiaoCidadeVinculos(Guid regiaoId);
+        void RemoveRegiaoCidadeVinculos(Guid regiaoId);        
     }
 }
