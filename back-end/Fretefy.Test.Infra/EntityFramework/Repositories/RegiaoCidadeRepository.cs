@@ -43,7 +43,7 @@ namespace Fretefy.Test.Infra.EntityFramework.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
-        public Task<bool> CheckExists(Guid regiaoId, Guid cidadeId)
+        public Task<bool> CheckExistsAsync(Guid regiaoId, Guid cidadeId)
         {
             return _dbSet.AnyAsync(x => x.RegiaoId == regiaoId && x.CidadeID == cidadeId);
         }

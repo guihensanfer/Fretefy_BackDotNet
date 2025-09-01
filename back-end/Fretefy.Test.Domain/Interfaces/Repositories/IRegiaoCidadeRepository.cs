@@ -22,7 +22,7 @@ namespace Fretefy.Test.Domain.Interfaces.Repositories
         /// <param name="regiaoId"></param>
         /// <param name="cidadeId"></param>
         /// <returns></returns>
-        Task<bool> CheckExists(Guid regiaoId, Guid cidadeId);        
+        Task<bool> CheckExistsAsync(Guid regiaoId, Guid cidadeId);        
 
         Task SaveChangesAsync();    
     }

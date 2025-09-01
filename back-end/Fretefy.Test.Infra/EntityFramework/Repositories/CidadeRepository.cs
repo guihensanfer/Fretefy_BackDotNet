@@ -1,8 +1,10 @@
 ﻿using Fretefy.Test.Domain.Entities;
 using Fretefy.Test.Domain.Interfaces.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Fretefy.Test.Infra.EntityFramework.Repositories
 {
@@ -13,6 +15,17 @@ namespace Fretefy.Test.Infra.EntityFramework.Repositories
         public CidadeRepository(DbContext dbContext)
         {
             _dbSet = dbContext.Set<Cidade>();
+        }
+
+        public async Task<bool> AllExists(Guid[] cidadeIds)
+        {
+            cidadeIds = cidadeIds
+                .Distinct()
+                .ToArray();
+                
+            var count = await _dbSet.CountAsync(x => cidadeIds.Contains(x.Id));
+
+            return count == cidadeIds.Length;
         }
 
         public IQueryable<Cidade> List()

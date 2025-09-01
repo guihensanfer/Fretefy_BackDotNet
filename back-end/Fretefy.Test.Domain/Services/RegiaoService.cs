@@ -5,6 +5,7 @@ using Fretefy.Test.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 namespace Fretefy.Test.Domain.Services
@@ -13,15 +14,17 @@ namespace Fretefy.Test.Domain.Services
     {
         private readonly IRegiaoRepository _regiaoRepository;
         private readonly IRegiaoCidadeRepository _regiaoCidadeRepository;
+        private readonly ICidadeRepository _cidadeRepository;
 
         public RegiaoService()
         {
         }
 
-        public RegiaoService(IRegiaoRepository regiaoRepository, IRegiaoCidadeRepository regiaoCidadeRepository)
+        public RegiaoService(IRegiaoRepository regiaoRepository, IRegiaoCidadeRepository regiaoCidadeRepository, ICidadeRepository cidadeRepository)
         {
             _regiaoRepository = regiaoRepository;
             _regiaoCidadeRepository = regiaoCidadeRepository;
+            _cidadeRepository = cidadeRepository;
         }
 
         public async Task<RegiaoDTO> AddRegiaoAsync(RegiaoCreateDTO regiao)
@@ -35,12 +38,17 @@ namespace Fretefy.Test.Domain.Services
             if (regiao.CidadesIdsVinculadas == null || regiao.CidadesIdsVinculadas.Length <= 0)
                 throw new InvalidOperationException("Nenhuma cidade vinculada. Informe ao menos uma cidade a esta região.");
 
+            var todasCidadesExistem = await _cidadeRepository.AllExists(regiao.CidadesIdsVinculadas);
+
+            if (!todasCidadesExistem)
+                throw new InvalidOperationException("Uma ou mais cidades não estão disponíveis.");
+
             regiao.Nome = regiao.Nome.Trim(); // Limpa os espaços para evitar erros de digitação
 
             var exists = await _regiaoRepository.ExistsByNomeAsync(regiao.Nome);
 
             if (exists)
-                throw new InvalidOperationException("Região já existente.");
+                throw new InvalidOperationException("Região já existente.");                    
 
             // Regiao
 
@@ -67,23 +75,24 @@ namespace Fretefy.Test.Domain.Services
             if (cidadeIds == null || cidadeIds.Length <= 0)
                 throw new InvalidOperationException("Informe ao menos uma cidade.");
 
-            // Somente os ids que são novos, os já existentes ignora
-            List<Guid> cidadesIdsValidas = new List<Guid>();
+            var idsRepetidos = cidadeIds.GroupBy(x => x)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key);
 
-            foreach (var cidadeId in cidadeIds)
-            {
-                if (await _regiaoCidadeRepository.CheckExists(regiaoId, cidadeId) == false)
-                {
-                    cidadesIdsValidas.Add(cidadeId);
-                }                    
-            }
+            if (idsRepetidos.Any())
+                throw new InvalidOperationException($"Id cidade {idsRepetidos.First()} foi definido mais de uma vez.");
+
+            var todasCidadesExistem = await _cidadeRepository.AllExists(cidadeIds);
+
+            if (!todasCidadesExistem)
+                throw new InvalidOperationException("Uma ou mais cidades não estão disponíveis.");            
 
             // Primeiro remove os vinculos existentes
             RemoveRegiaoCidadeVinculos(regiaoId);
 
             // Percorre os ids para criar um insert em massa
             List<RegiaoCidade> vinculos = new List<RegiaoCidade>();
-            vinculos.AddRange(cidadesIdsValidas.Select(c => new RegiaoCidade(regiaoId, c)));            
+            vinculos.AddRange(cidadeIds.Select(c => new RegiaoCidade(regiaoId, c)));            
             await _regiaoCidadeRepository.AddRangeAsync(vinculos);
 
             await _regiaoCidadeRepository.SaveChangesAsync();

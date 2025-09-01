@@ -59,10 +59,8 @@ namespace Fretefy.Test.WebApi.Controllers
             if (regiaoDTO == null || regiaoDTO.CidadesIdsVinculadas == null)
                 return BadRequest("Objeto Região não pode ser nulo.");            
            
-
             try
-            {
-                
+            {                
                 await _regiaoService.AddRegiaoCidadeVinculosAsync(
                     regiaoDTO.RegiaoId,
                     regiaoDTO.CidadesIdsVinculadas
@@ -96,7 +94,8 @@ namespace Fretefy.Test.WebApi.Controllers
             try
             {
                 _regiaoService.UpdateRegiao(regiao);
-                return Ok(regiao);
+
+                return Ok(regiao);             
             }
             catch (InvalidOperationException ex)
             {
