@@ -9,7 +9,7 @@ namespace Fretefy.Test.Domain.Interfaces
     public interface IRegiaoService
     {
         // Insert
-        Task<RegiaoDTO> AddRegiaoAsync(RegiaoDTO regiao);
+        Task<RegiaoDTO> AddRegiaoAsync(RegiaoCreateDTO regiao);
 
         // Update
         void UpdateRegiao(Regiao regiao);

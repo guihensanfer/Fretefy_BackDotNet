@@ -26,7 +26,7 @@ namespace Fretefy.Test.WebApi.Controllers
         /// <param name="regiaoDTO">Objeto contendo informações da região</param>
         /// <returns>Retorna a região criada</returns>
         [HttpPost("AddRegiao")]
-        public async Task<IActionResult> AddRegiao([FromBody] RegiaoDTO regiaoDTO)
+        public async Task<IActionResult> AddRegiao([FromBody] RegiaoCreateDTO regiaoDTO)
         {
             if (regiaoDTO == null)
                 return BadRequest("Objeto Região não pode ser nulo.");

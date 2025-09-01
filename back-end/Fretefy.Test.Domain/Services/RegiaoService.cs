@@ -24,38 +24,39 @@ namespace Fretefy.Test.Domain.Services
             _regiaoCidadeRepository = regiaoCidadeRepository;
         }
 
-        public async Task<RegiaoDTO> AddRegiaoAsync(RegiaoDTO regiao)
+        public async Task<RegiaoDTO> AddRegiaoAsync(RegiaoCreateDTO regiao)
         {
-            if (regiao == null || regiao.Regiao == null)
+            if (regiao == null)
                 throw new InvalidOperationException("Objeto Região inválido.");
 
-            if (string.IsNullOrWhiteSpace(regiao.Regiao.Nome))
+            if (string.IsNullOrWhiteSpace(regiao.Nome))
                 throw new InvalidOperationException("Região sem nome.");
 
-            if (regiao.CidadesVinculadas == null || regiao.CidadesVinculadas.Count <= 0)
+            if (regiao.CidadesIdsVinculadas == null || regiao.CidadesIdsVinculadas.Length <= 0)
                 throw new InvalidOperationException("Nenhuma cidade vinculada. Informe ao menos uma cidade a esta região.");
 
-            regiao.Regiao.Nome = regiao.Regiao.Nome.Trim(); // Limpa os espaços para evitar erros de digitação
+            regiao.Nome = regiao.Nome.Trim(); // Limpa os espaços para evitar erros de digitação
 
-            var exists = await _regiaoRepository.ExistsByNomeAsync(regiao.Regiao.Nome);
+            var exists = await _regiaoRepository.ExistsByNomeAsync(regiao.Nome);
 
             if (exists)
                 throw new InvalidOperationException("Região já existente.");
 
             // Regiao
 
-            await _regiaoRepository.AddAsync(regiao.Regiao);
+            var regiaoObj = regiao.GetRegiaoFromSelf();
+
+            await _regiaoRepository.AddAsync(regiaoObj);
             // Salva a região para receber os ids correspondente do banco
             await _regiaoRepository.SaveChangesAsync();
 
-            Guid regiaoScopeId = regiao.Regiao.Id;
+            // Id salvo no banco na transação
+            Guid regiaoScopeId = regiaoObj.Id;
 
             // Região cidade
 
-            // Percorre os ids para criar um insert em massa
-            List<RegiaoCidade> vinculos = new List<RegiaoCidade>();
-            vinculos.AddRange(regiao.CidadesVinculadas.Select(c => new RegiaoCidade(regiaoScopeId, c.CidadeID)));
-            await _regiaoCidadeRepository.AddRangeAsync(vinculos);
+            // Percorre os ids para criar um insert em massa            
+            await _regiaoCidadeRepository.AddRangeAsync(regiao.GetRegiaoCidadeFromSelf(regiaoScopeId));
             await _regiaoCidadeRepository.SaveChangesAsync();
 
             return await GetRegiaoByIdAsync(regiaoScopeId);
