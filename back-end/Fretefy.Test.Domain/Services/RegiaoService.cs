@@ -2,10 +2,11 @@
 using Fretefy.Test.Domain.Interfaces;
 using Fretefy.Test.Domain.Interfaces.Repositories;
 using Fretefy.Test.Domain.Models;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Fretefy.Test.Domain.Services
@@ -15,16 +16,15 @@ namespace Fretefy.Test.Domain.Services
         private readonly IRegiaoRepository _regiaoRepository;
         private readonly IRegiaoCidadeRepository _regiaoCidadeRepository;
         private readonly ICidadeRepository _cidadeRepository;
+        private readonly HttpClient _httpClient;
 
-        public RegiaoService()
-        {
-        }
 
-        public RegiaoService(IRegiaoRepository regiaoRepository, IRegiaoCidadeRepository regiaoCidadeRepository, ICidadeRepository cidadeRepository)
+        public RegiaoService(IRegiaoRepository regiaoRepository, IRegiaoCidadeRepository regiaoCidadeRepository, ICidadeRepository cidadeRepository, HttpClient httpClient)
         {
             _regiaoRepository = regiaoRepository;
             _regiaoCidadeRepository = regiaoCidadeRepository;
             _cidadeRepository = cidadeRepository;
+            _httpClient = httpClient;
         }
 
         public async Task<RegiaoDTO> AddRegiaoAsync(RegiaoCreateDTO regiao)
@@ -68,6 +68,56 @@ namespace Fretefy.Test.Domain.Services
             await _regiaoCidadeRepository.SaveChangesAsync();
 
             return await GetRegiaoByIdAsync(regiaoScopeId);
+        }
+
+        public async Task<RegiaoDTO> AddRegiaoByCEPAsync(string cep)
+        {
+            if (string.IsNullOrWhiteSpace(cep))
+                throw new ArgumentNullException("CEP deve ser fornecido.");
+
+            // Remove caracteres inválidos (apenas números no CEP)
+            cep = new string(cep.Where(char.IsDigit).ToArray());
+
+            if (cep.Length != 8)
+                throw new ArgumentException("CEP deve conter 8 dígitos numéricos.", nameof(cep));
+
+            var url = $"https://viacep.com.br/ws/{cep}/json/";
+
+            var response = await _httpClient.GetAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+                throw new HttpRequestException($"Erro ao consultar o CEP {cep}. Status: {response.StatusCode}");
+
+            var content = await response.Content.ReadAsStringAsync();
+
+            // Deserializa o JSON do ViaCEP
+            var viaCep = JsonConvert.DeserializeObject<ViaCepResponse>(content);
+
+            if (viaCep == null || !string.IsNullOrEmpty(viaCep.Erro))
+                throw new Exception($"CEP {cep} não encontrado.");
+
+            var cidadesRelacionadas = _cidadeRepository.ListByUf(viaCep.Uf);
+
+            if(cidadesRelacionadas == null)
+                throw new Exception($"Não encontrado cidades com UF {viaCep.Uf}");
+
+            var cidadeIdealId = cidadesRelacionadas
+                .Where(c => string.Equals(c.Nome, viaCep.Localidade, StringComparison.OrdinalIgnoreCase))
+                ?.Select(x => x.Id);
+
+            if (cidadeIdealId == null || !cidadeIdealId.Any())
+                throw new Exception($"Não encontrado cidade {viaCep.Localidade}");
+
+            // Monta o DTO
+                var regiaoDto = new RegiaoCreateDTO
+            {
+                Nome = viaCep.regiao ?? ($"{viaCep.Localidade} - {viaCep.Uf}"),
+                Ativo = true,
+                CidadesIdsVinculadas = cidadeIdealId.ToArray(),
+            };
+        
+            // Adiciona e retorna a região com as cidades encontradas
+            return await AddRegiaoAsync(regiaoDto);
         }
 
         public async Task AddRegiaoCidadeVinculosAsync(Guid regiaoId, Guid[] cidadeIds)

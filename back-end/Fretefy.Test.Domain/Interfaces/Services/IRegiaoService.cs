@@ -11,6 +11,13 @@ namespace Fretefy.Test.Domain.Interfaces
         // Insert
         Task<RegiaoDTO> AddRegiaoAsync(RegiaoCreateDTO regiao);
 
+        /// <summary>
+        /// Cria registro de 
+        /// </summary>
+        /// <param name="cep"></param>
+        /// <returns></returns>
+        Task<RegiaoDTO> AddRegiaoByCEPAsync(string cep);
+
         // Update
         void UpdateRegiao(Regiao regiao);
 

@@ -1,3 +1,4 @@
+using System.Net.Http;
 using Fretefy.Test.Domain.Interfaces;
 using Fretefy.Test.Domain.Interfaces.Repositories;
 using Fretefy.Test.Domain.Services;
@@ -20,7 +21,7 @@ namespace Fretefy.Test.WebApi
             services.AddDbContext<TestDbContext>((provider, options) =>
             {
                 options.UseSqlite("Data Source=Data\\Test.db");
-            });
+            });            
 
             ConfigureInfraService(services);
             ConfigureDomainService(services);
@@ -43,8 +44,9 @@ namespace Fretefy.Test.WebApi
 
         private void ConfigureDomainService(IServiceCollection services)
         {
+            services.AddScoped<HttpClient>();
             services.AddScoped<ICidadeService, CidadeService>();
-            services.AddScoped<IRegiaoService, RegiaoService>();                        
+            services.AddScoped<IRegiaoService, RegiaoService>();                                       
         }
 
         private void ConfigureInfraService(IServiceCollection services)

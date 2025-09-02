@@ -49,6 +49,32 @@ namespace Fretefy.Test.WebApi.Controllers
         }
 
         /// <summary>
+        /// Adiciona uma nova região a partir de um CEP fornecido.
+        /// </summary>
+        /// <param name="regiaoDTO">Objeto contendo informações da região</param>
+        /// <returns>Retorna a região criada</returns>
+        [HttpPost("AddRegiaoByCEPUsandoViaCEPAPI")]
+        public async Task<IActionResult> AddRegiaoByCEPUsandoViaCEPAPI([FromQuery] string cep)
+        {            
+            try
+            {
+                var regiao = await _regiaoService.AddRegiaoByCEPAsync(cep);
+
+                return Ok(regiao); // 200 OK com objeto criado
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Regra de negócio violada (ex: região já existe)
+                return BadRequest(ex.Message); // 400 Bad Request
+            }
+            catch (Exception ex)
+            {
+                // Erros inesperados
+                return StatusCode(500, $"Erro interno: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Atualiza vínculos de cidades a uma região
         /// </summary>
         /// <param name="regiaoDTO">Objeto contendo região e lista de cidades</param>
