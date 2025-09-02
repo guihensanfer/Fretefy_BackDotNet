@@ -3,9 +3,11 @@ using Fretefy.Test.Domain.Interfaces;
 using Fretefy.Test.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using ClosedXML.Excel;
 using System.Threading.Tasks;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Fretefy.Test.WebApi.Controllers
 {
@@ -14,10 +16,12 @@ namespace Fretefy.Test.WebApi.Controllers
     public class RegiaoController : ControllerBase
     {
         private readonly IRegiaoService _regiaoService;
+        private readonly ICidadeService _cidadeService;
 
-        public RegiaoController(IRegiaoService regiaoService)
+        public RegiaoController(IRegiaoService regiaoService, ICidadeService cidadeService)
         {
             _regiaoService = regiaoService;
+            _cidadeService = cidadeService;
         }
 
         /// <summary>
@@ -178,47 +182,19 @@ namespace Fretefy.Test.WebApi.Controllers
         
 
         /// <summary>
-        /// Lista todas as regiões
-        /// </summary>
-        /// <param name="ativo">Filtra apenas regiões ativas (opcional)</param>
-        /// <param name="page">Número da página</param>
-        /// <param name="itemsPerPage">Itens por página</param>
-        /// <returns>Lista paginada de regiões</returns>
-        [HttpGet]
-        public async Task<IActionResult> ListRegioes([FromQuery] bool? ativo = true, [FromQuery] int page = 1, [FromQuery] int itemsPerPage = 15)
-        {
-            try
-            {
-                var result = await _regiaoService.ListRegioesAsync(new Paginacao(page, itemsPerPage), ativo);
-
-                return Ok(result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                // Regra de negócio violada (ex: região já existe)
-                return BadRequest(ex.Message); // 400 Bad Request
-            }
-            catch (Exception ex)
-            {
-                // Erros inesperados
-                return StatusCode(500, $"Erro interno: {ex.Message}");
-            }
-        }
-        
-        /// <summary>
-        /// Lista regiões filtradas pelo nome
+        /// Lista regiões.
         /// </summary>
         /// <param name="nome">Nome da região</param>
         /// <param name="ativo">Filtra apenas regiões ativas (opcional)</param>
         /// <param name="page">Número da página</param>
         /// <param name="itemsPerPage">Itens por página</param>
         /// <returns>Lista paginada de regiões filtradas</returns>
-        [HttpGet("ListRegioesByNome")]
-        public async Task<IActionResult> ListRegioesByNome([FromQuery] string nome, [FromQuery] bool? ativo = true, [FromQuery] int page = 1, [FromQuery] int itemsPerPage = 15)
+        [HttpGet("ListRegioes")]
+        public async Task<IActionResult> ListRegioes([FromQuery] string nome = null, [FromQuery] bool? ativo = true, [FromQuery] int page = 1, [FromQuery] int itemsPerPage = 15)
         {            
             try
             {
-                var result = await _regiaoService.ListRegioesByNomeAsync(new Paginacao(page, itemsPerPage), nome, ativo);
+                var result = await _regiaoService.ListRegioesAsync(new Paginacao(page, itemsPerPage), nome, ativo);
 
                 return Ok(result);
             }
@@ -233,5 +209,81 @@ namespace Fretefy.Test.WebApi.Controllers
                 return StatusCode(500, $"Erro interno: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// Exporta lista de regiões para Excel
+        /// </summary>
+        /// <param name="ativo">Filtra apenas regiões ativas (opcional)</param>
+        /// <param name="nome">Filtro por nome da região (opcional)</param>
+        /// <returns>Arquivo Excel com lista de regiões</returns>
+        [HttpGet("ListRegioesExportXLS")]
+        public async Task<IActionResult> ListRegioesExportXLS([FromQuery] bool? ativo = true, [FromQuery] string nome = null)
+        {
+            try
+            {
+                var regioes = await _regiaoService.ListRegioesAsync(null, nome, ativo);
+
+                if (regioes?.Data == null || !regioes.Data.Any())
+                {
+                    return NotFound("Nenhuma região encontrada.");
+                }
+
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Regiões");
+
+                // Cabeçalhos
+                worksheet.Cell(1, 1).Value = "Id";
+                worksheet.Cell(1, 2).Value = "Nome";
+                worksheet.Cell(1, 3).Value = "Ativo";
+                worksheet.Cell(1, 4).Value = "Cidades Vinculadas";
+
+                // Estilo dos cabeçalhos
+                var headerRange = worksheet.Range(1, 1, 1, 4);
+                headerRange.Style.Font.Bold = true;
+                headerRange.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                // Dados
+                int row = 2;
+                foreach (var regiao in regioes.Data)
+                {
+                    worksheet.Cell(row, 1).Value = regiao.Regiao.Id;
+                    worksheet.Cell(row, 2).Value = regiao.Regiao.Nome;
+                    worksheet.Cell(row, 3).Value = regiao.Regiao.Ativo ? "Sim" : "Não";
+
+                    List<string> cidadeNomes = new List<string>();
+
+                    worksheet.Cell(row, 4).Value = string.Join(", ", regiao.CidadesVinculadas.Select(x => _cidadeService.Get(x.CidadeID).Nome));
+                    row++;
+                }
+
+                // Autoajustar colunas
+                worksheet.Columns().AdjustToContents();
+
+                // Salvar em memória
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+                stream.Position = 0;
+
+                // Retornar o arquivo para download
+                return File(
+                    stream.ToArray(),
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "Regioes.xlsx"
+                );
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Regra de negócio violada (ex: região já existe)
+                return BadRequest(new { erro = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Erros inesperados
+                return StatusCode(500, new { erro = $"Erro interno: {ex.Message}" });
+            }
+        }
+
+        
+        
     }
 }

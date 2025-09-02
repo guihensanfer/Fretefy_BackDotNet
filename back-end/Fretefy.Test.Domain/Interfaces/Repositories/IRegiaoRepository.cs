@@ -19,10 +19,9 @@ namespace Fretefy.Test.Domain.Interfaces.Repositories
         void Remove(Regiao regiao);
 
         // GET
-        Task<bool> ExistsByNomeAsync(string nome);
-        Task<List<Regiao>> ListAsync(Paginacao paginacao, bool? ativo = true);
+        Task<bool> ExistsByNomeAsync(string nome);        
         Task<Regiao> GetByIdAsync(Guid regiaoId);
-        Task<List<Regiao>> ListByNomeAsync(Paginacao paginacao, string nome, bool? ativo = true);
+        Task<List<Regiao>> ListAsync(Paginacao paginacao, string nome = null, bool? ativo = true);
 
         // Atualiza a transação no banco
         Task SaveChangesAsync();

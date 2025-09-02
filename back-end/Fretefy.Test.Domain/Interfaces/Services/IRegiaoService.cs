@@ -25,8 +25,7 @@ namespace Fretefy.Test.Domain.Interfaces
         void RemoveRegiao(Regiao regiao);
 
         // GET        
-        Task<RegioesDTO> ListRegioesAsync(Paginacao paginacao, bool? ativo = true);
-        Task<RegioesDTO> ListRegioesByNomeAsync(Paginacao paginacao, string nome, bool? ativo = true);
+        Task<RegioesDTO> ListRegioesAsync(Paginacao paginacao,string nome = null, bool? ativo = true);        
         Task<RegiaoDTO> GetRegiaoByIdAsync(Guid regiaoId);
 
         // Regiões cidades

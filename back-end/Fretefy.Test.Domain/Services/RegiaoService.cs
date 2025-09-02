@@ -162,26 +162,9 @@ namespace Fretefy.Test.Domain.Services
             return regiaoDTO;
         }
 
-        public async Task<RegioesDTO> ListRegioesAsync(Paginacao paginacao, bool? ativo = true)
+        public async Task<RegioesDTO> ListRegioesAsync(Paginacao paginacao, string nome = null, bool? ativo = true)
         {
-            var regioes = await _regiaoRepository.ListAsync(paginacao, ativo);
-            RegioesDTO regioesDTO = new RegioesDTO();            
-
-            foreach (var regiao in regioes)
-            {
-                RegiaoDTO regiaoDTO = new RegiaoDTO();
-                regiaoDTO.Regiao = regiao;
-                regiaoDTO.CidadesVinculadas = await _regiaoCidadeRepository.ListByRegiaoIdAsync(regiao.Id);
-
-                regioesDTO.Data.Add(regiaoDTO);
-            }                        
-
-            return regioesDTO;
-        }
-
-        public async Task<RegioesDTO> ListRegioesByNomeAsync(Paginacao paginacao, string nome, bool? ativo = true)
-        {
-            var regioes = await _regiaoRepository.ListByNomeAsync(paginacao, nome, ativo);
+            var regioes = await _regiaoRepository.ListAsync(paginacao, nome, ativo);
             RegioesDTO regioesDTO = new RegioesDTO();
 
             foreach (var regiao in regioes)

@@ -13,7 +13,7 @@ namespace Fretefy.Test.Domain.Entities
         }
 
         public Guid RegiaoId { get; set; }                 
-        public Guid CidadeID { get; set; }        
+        public Guid CidadeID { get; set; }             
         
         public Guid Id { get; set; }
     }
